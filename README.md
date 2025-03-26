@@ -17,6 +17,7 @@ Contact: xu1639@purdue.edu
   * [1.1 Configure environment](#11-configure-environment)
   * [1.2 Training](#12-training)
   * [1.3 Testing and evaluation](#13-testing-and-evaluation)
+  * [1.4 Regenerate testing set](#14-regenerate-testing-set)
 - [2 Citation](#3-citation)
 
 ## 0 Introduction
