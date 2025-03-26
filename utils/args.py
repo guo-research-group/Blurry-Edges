@@ -7,6 +7,7 @@ def get_args(mode, big=False):
     parser.add_argument('--cuda', type=str, default='cuda:0', help='enable cuda')
     parser.add_argument('--model_path', type=str, default='./pretrained_weights', help='path of model weights')
     parser.add_argument('--img_size', type=int, default=(147,147), help='image size')
+    parser.add_argument('--big_img_size', type=int, default=(587,587), help='big image size')
     parser.add_argument('--R', type=int, default=21, help='patch size')
     parser.add_argument('--w', type=float, default=1, help='w in loss function')
     parser.add_argument('--alpha_lambda', type=float, default=5e-3, help='rate for lambda in ridge regression')
@@ -14,10 +15,10 @@ def get_args(mode, big=False):
     parser.add_argument('--mag', type=float, default=4, help='magnification factor')
 
     # basic shape dataset generation
-    if mode == 'data_gen':
+    if mode == 'data_gen_train_val':
         parser.add_argument('--data_path', type=str, default='./data/data_train_val', help='path of dataset')
-        parser.add_argument('--num_sample_training', type=int, default=80, help='number of samples to generate in training set')
-        parser.add_argument('--num_sample_testing', type=int, default=80, help='number of samples to generate in testing set')
+        parser.add_argument('--num_sample_train', type=int, default=8000, help='number of samples to generate in training set')
+        parser.add_argument('--num_sample_val', type=int, default=2000, help='number of samples to generate in validation set')
         parser.add_argument('--num_shape', type=tuple, default=(15,26), help='number of shapes to generate in each image')
         parser.add_argument('--Z_range', type=tuple, default=(0.75,1.18), help='distance between the object and the camera (m)')
         parser.add_argument('--alpha', type=tuple, default=(180,200), help='maximum average number of photons')
@@ -61,6 +62,16 @@ def get_args(mode, big=False):
         parser.add_argument('--input_size', type=int, default=38, help='input layer size')
         parser.add_argument('--output_size', type=int, default=12, help='output layer size')
 
+    # realistic dataset generation
+    if mode == 'data_gen_test':
+        parser.add_argument('--data_path', type=str, default='./data/data_test', help='path of dataset')
+        parser.add_argument('--frgd_path', type=str, default='./data/MS_COCO_annotations/', help='path of MS COCO dataset')
+        parser.add_argument('--bkgd_path', type=str, default='./data/Painting/', help='path of painting dataset')
+        parser.add_argument('--num_sample_test', type=int, default=200, help='number of samples to generate in testing set')
+        parser.add_argument('--Z_range', type=tuple, default=(0.75,1.18), help='distance between the object and the camera (m)')
+        parser.add_argument('--alpha', type=tuple, default=(180,200), help='maximum average number of photons')
+        parser.add_argument('--sigma', type=float, default=2, help='read noise coefficient')
+
     # evaluation
     elif mode == 'eval':
         parser.add_argument('--stride', type=int, default=2, help='stride')
@@ -69,7 +80,6 @@ def get_args(mode, big=False):
         parser.add_argument('--crop', type=int, default=10, help='center crop')
         parser.add_argument('--rho_prime', type=float, default=10.39, help='equivalent optical power for refocusing')
         if big:
-            parser.add_argument('--big_img_size', type=int, default=(587,587), help='big image size')
             parser.add_argument('--n_margin_patch', type=int, default=10, help='number of margin patches that will be removed for global maps')
             parser.add_argument('--data_path', type=str, default='./data/data_test_big', help='path of dataset')
         else:

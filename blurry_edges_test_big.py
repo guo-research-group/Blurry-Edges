@@ -102,13 +102,12 @@ def local2global_bndry(args, num_patches, bndry_patches):
             num_patches.unsqueeze(0).unsqueeze(0)).detach().cpu().numpy()
 
 def local2global_depth(args, H_patches, W_patches, num_patches, depth_map, depth_mask):
-    num_depth_patches = torch.nn.Fold(output_size=[args.big_img_size[0], args.big_img_size[1]],
-                                        kernel_size=args.R,
-                                        stride=args.stride)((depth_mask.view(args.batch_size,args.R**2,H_patches*W_patches) > 0).to(torch.float32)).view(args.batch_size, args.big_img_size[0], args.big_img_size[1])
+    num_depth_patches = torch.nn.Fold(output_size=[args.big_img_size[0], args.big_img_size[1]], kernel_size=args.R, stride=args.stride)(
+                        (depth_mask.view(args.batch_size,args.R**2,H_patches*W_patches) > 0).to(torch.float32)).view(args.batch_size, args.big_img_size[0], args.big_img_size[1])
     confidence_map = num_depth_patches / num_patches.unsqueeze(0)
     depth_map = torch.nn.Fold(output_size=[args.big_img_size[0], args.big_img_size[1]], kernel_size=args.R, stride=args.stride)(
-                                depth_map.view(args.batch_size, args.R**2, -1)).view(args.batch_size, args.big_img_size[0], args.big_img_size[1]) / \
-                                torch.where(num_depth_patches > 0, num_depth_patches, torch.ones_like(num_depth_patches))
+                depth_map.view(args.batch_size, args.R**2, -1)).view(args.batch_size, args.big_img_size[0], args.big_img_size[1]) / \
+                torch.where(num_depth_patches > 0, num_depth_patches, torch.ones_like(num_depth_patches))
     return depth_map.detach().cpu().numpy(), confidence_map.detach().cpu().numpy()
 
 def depth_estimator(args, local_module, global_module, helper, visualizer, datasetloader):

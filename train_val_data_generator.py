@@ -8,8 +8,8 @@ class SyntheticDataGenerator:
     def __init__(self, args):
         self.image_size = args.img_size
         self.data_path = args.data_path
-        self.num_sample_training = args.num_sample_training
-        self.num_sample_testing = args.num_sample_testing
+        self.num_sample_train = args.num_sample_train
+        self.num_sample_val = args.num_sample_val
         self.num_shape = args.num_shape
         self.Z_range = args.Z_range
         self.s = args.cam_params['s']
@@ -142,7 +142,7 @@ class SyntheticDataGenerator:
         return imgs, img_aif, boundary_loc, image_depth, boundary_depth, boundary_dist, deri/255
 
     def generate_synthetic_data(self, train=True):
-        num_sample = self.num_sample_training if train else self.num_sample_testing
+        num_sample = self.num_sample_train if train else self.num_sample_val
         partition = 'train' if train else 'val'
         visualization_path = f'{self.data_path}/{partition}'
         create_directory(visualization_path)
@@ -191,7 +191,7 @@ class SyntheticDataGenerator:
         np.save(f'{self.data_path}/derivative_maps_{partition}.npy', self.derivative_maps)
     
     def add_noise(self, train=True):
-        num_sample = self.num_sample_training if train else self.num_sample_testing
+        num_sample = self.num_sample_train if train else self.num_sample_val
         partition = 'train' if train else 'val'
         visualization_path = f'{self.data_path}/{partition}'
         create_directory(visualization_path, overwrite=False)
@@ -213,7 +213,7 @@ class SyntheticDataGenerator:
         np.save(f'{self.data_path}/images_ny_{partition}.npy', self.images_ny)
     
     def crop_patch(self, train=True):
-        n_patch = self.num_sample_training * 2 if train else self.num_sample_testing * 2
+        n_patch = self.num_sample_train * 2 if train else self.num_sample_val * 2
         partition = 'train' if train else 'val'
         visualization_path = f'{self.data_path}/patches/{partition}'
         create_directory(visualization_path)
@@ -304,7 +304,7 @@ class SyntheticDataGenerator:
 
 if __name__ == "__main__":
 
-    args = get_args('data_gen')
+    args = get_args('data_gen_train_val')
 
     set_seed(1869)
 

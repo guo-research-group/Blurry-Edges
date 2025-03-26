@@ -164,13 +164,12 @@ class PostProcessGlobalBase(PostProcessBase):
                 self.num_patches.unsqueeze(0).unsqueeze(0)
 
     def local2global_depth(self, depth_map, depth_mask):
-        num_depth_patches = torch.nn.Fold(output_size=[self.H, self.W],
-                                          kernel_size=self.R,
-                                          stride=self.stride)((depth_mask.view(self.batch_size,self.R**2,self.H_patches*self.W_patches) > 0).to(torch.float32)).view(self.batch_size, self.H, self.W)
+        num_depth_patches = torch.nn.Fold(output_size=[self.H, self.W], kernel_size=self.R, stride=self.stride)(
+                            (depth_mask.view(self.batch_size,self.R**2,self.H_patches*self.W_patches) > 0).to(torch.float32)).view(self.batch_size, self.H, self.W)
         confidence_map = num_depth_patches / self.num_patches.unsqueeze(0)
         depth_map = torch.nn.Fold(output_size=[self.H, self.W], kernel_size=self.R, stride=self.stride)(
-                                  depth_map.view(self.batch_size, self.R**2, -1)).view(self.batch_size, self.H, self.W) / \
-                                  torch.where(num_depth_patches > 0, num_depth_patches, torch.ones_like(num_depth_patches))
+                    depth_map.view(self.batch_size, self.R**2, -1)).view(self.batch_size, self.H, self.W) / \
+                    torch.where(num_depth_patches > 0, num_depth_patches, torch.ones_like(num_depth_patches))
         return depth_map, confidence_map
     
 

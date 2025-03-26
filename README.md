@@ -69,6 +69,14 @@ Test with large-size synthetic data using blocks.
 
     python blurry_edges_test_big.py
 
+### 1.4 Regenerate testing set
+
+Users can generate testing set (both regular and large size). First, download [The Painting dataset](https://www.robots.ox.ac.uk/~vgg/data/paintings/) to `./data/Painting` and [MS COCO dataset](https://cocodataset.org/) (in our experiments, we only use `2017 Val` images and `instances_val2017` annotations) to `./data/MS_COCO_annotations`. Then run the following prompt to generate testing set with regular image size.
+
+    python test_data_generator.py
+
+Simply switch `BIG = True` to jave big size. We recommend you use the size of $147 + 4x$, where $x = 0, 1, 2, ...$. Users also need to change `big_img_size` and `n_margin_patch` arguments accordingly. 
+
 ## 2 Citation
 
 ```
