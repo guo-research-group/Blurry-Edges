@@ -75,7 +75,7 @@ Users can generate testing set (both regular and large size). First, download [T
 
     python test_data_generator.py
 
-Simply switch `BIG = True` to jave big size. We recommend you use the size of $147 + 4x$, where $x = 0, 1, 2, ...$. Users also need to change `big_img_size` and `n_margin_patch` arguments accordingly. 
+Simply switch `BIG = True` to jave big size. We recommend you use the size of $147 + 4x$, where $x = 0, 1, 2, \cdots$. Users also need to change `big_img_size` and `n_margin_patch` arguments accordingly. 
 
 ## 2 Citation
 
