@@ -21,8 +21,8 @@ class SyntheticDataGenerator:
         self.sigma = args.sigma
         self.R = args.R
 
-        self.deri_vis_low = 1.25 * self.Z_range[0] - 0.25 * self.Z_range[1] # lower - (upper - lower) * 0.25
-        self.deri_vis_range = 1.25 * (self.Z_range[1] - self.Z_range[0]) # (upper - lower) + (upper - lower) * 0.25
+        self.dep_vis_low = 1.25 * self.Z_range[0] - 0.25 * self.Z_range[1] # lower - (upper - lower) * 0.25
+        self.dep_vis_range = 1.25 * (self.Z_range[1] - self.Z_range[0]) # (upper - lower) + (upper - lower) * 0.25
         self.n_img = len(self.rhos)
         self.struct_crop = generate_binary_structure(2, 2)
         self.half_R = self.R // 2
@@ -77,14 +77,10 @@ class SyntheticDataGenerator:
                 cv2.circle(mask_bndry, (int(center[i,0]), int(center[i,1])), radius, 255, 1)
                 cv2.circle(mask_bndry_depth, (int(center[i,0]), int(center[i,1])), radius, 255, 1)
             elif ind == 1:
-                # size, angle, and color of the rectangle
                 size_angle = np.random.uniform(0, [max_size,max_size,180], size=3)
-                # Create a RotatedRect object
                 rect = ((center[i,0], center[i,1]), (size_angle[0], size_angle[1]), size_angle[2])
-                # Get the vertices of the rectangle
                 box = cv2.boxPoints(rect)
                 box = np.int64(box)
-                # Draw the rectangle on the mask
                 cv2.drawContours(mask, [box], 0, 255, -1)
                 cv2.drawContours(mask_bndry, [box], 0, 255, 1)
                 cv2.drawContours(mask_bndry_depth, [box], 0, 255, 1)
@@ -105,16 +101,12 @@ class SyntheticDataGenerator:
             mask_bndry_depth_ind = np.where(mask_depth_fill > 0)
             boundary_depth[mask_bndry_depth_ind] = mask_bndry_depth[mask_bndry_depth_ind]
 
-            # Calculate the standard deviation for Gaussian blur
             sigmas = self.get_kernel_sigma(param_obj[i,0])
             for ii, sigma in enumerate(sigmas):
-                # Get the Gaussian blur kernels
                 kernel = self.get_blur_kernel(sigma)
-                # Apply Gaussian blur to the mask
                 mask_blurred = convolve(mask, kernel, mode='reflect')
-                # Blend the rectangle with the background using the blurred mask
                 shape_blurred_ind = np.where(mask_blurred > 0)
-                for j in range(3): # Apply the color to each channel
+                for j in range(3):
                     imgs[ii, :, :, j][shape_blurred_ind] = mask_blurred[shape_blurred_ind] / 255 * color[j] + (1 - mask_blurred[shape_blurred_ind] / 255) * imgs[ii, :, :, j][shape_blurred_ind]
             shape_ind = np.where(mask > 0)
             boundary_loc[shape_ind] = mask_bndry[shape_ind]
@@ -163,7 +155,6 @@ class SyntheticDataGenerator:
         num_obj = np.random.randint(self.num_shape[0], self.num_shape[1], size=num_sample)
         for i, n in tqdm(enumerate(num_obj), total=num_sample):
             imgs, img_aif, boundary_loc, image_depth, boundary_depth, boundary_dist, deri = self.generate_synthetic_image(n)
-            # Save the result images
             self.images[i,:,:,:,:] = imgs
             self.images_aif[i,:,:,:] = img_aif / 255
             self.boundary_locations[i,:,:] = boundary_loc
@@ -173,8 +164,8 @@ class SyntheticDataGenerator:
             self.derivative_maps[i,:,:,:,:] = deri
             cv2.imwrite(f'{visualization_path}/aif/{i}.png', img_aif.astype(np.uint8))
             cv2.imwrite(f'{visualization_path}/boundary_locations/{i}.png', boundary_loc.astype(np.uint8))
-            cv2.imwrite(f'{visualization_path}/image_depths/{i}.png', (((image_depth - self.deri_vis_low) / self.deri_vis_range) * 255).astype(np.uint8))
-            cv2.imwrite(f'{visualization_path}/boundary_depths/{i}.png', (((boundary_depth - self.deri_vis_low) / self.deri_vis_range) * 255).astype(np.uint8))
+            cv2.imwrite(f'{visualization_path}/image_depths/{i}.png', (((image_depth - self.dep_vis_low) / self.dep_vis_range) * 255).astype(np.uint8))
+            cv2.imwrite(f'{visualization_path}/boundary_depths/{i}.png', (((boundary_depth - self.dep_vis_low) / self.dep_vis_range) * 255).clip(0,255).astype(np.uint8))
             cv2.imwrite(f'{visualization_path}/boundary_distances/{i}.png', (boundary_dist / np.max(boundary_dist) * 255).astype(np.uint8))
             for ii in range(self.n_img):
                 cv2.imwrite(f'{visualization_path}/clean/{i}_{ii}.png', imgs[ii,:,:,:].astype(np.uint8))
@@ -182,7 +173,6 @@ class SyntheticDataGenerator:
                     cv2.imwrite(f'{visualization_path}/derivative_maps/{i}_{ii}.png', (deri[ii,:,:,:] / np.max(deri[ii,:,:,:]) * 255).astype(np.uint8))
                 else:
                     cv2.imwrite(f'{visualization_path}/derivative_maps/{i}_{ii}.png', deri[ii,:,:,:].astype(np.uint8))
-        # Save the result
         np.save(f'{self.data_path}/images_aif_{partition}.npy', self.images_aif)
         np.save(f'{self.data_path}/boundary_locations_{partition}.npy', self.boundary_locations)
         np.save(f'{self.data_path}/image_depths_{partition}.npy', self.image_depths)
@@ -284,8 +274,8 @@ class SyntheticDataGenerator:
             cv2.imwrite(f'{visualization_path}/clean/{i}.png', (patches_gt_data[i,:,:,:] / alpha_data[i] * 255).astype(np.uint8))
             cv2.imwrite(f'{visualization_path}/noisy/{i}.png', (patches_ny_data[i,:,:,:] / alpha_data[i] * 255).astype(np.uint8))
             cv2.imwrite(f'{visualization_path}/boundary_locations/{i}.png', patches_bndry_loc_data[i,:,:].astype(np.uint8))
-            cv2.imwrite(f'{visualization_path}/image_depths/{i}.png', ((patches_img_dep_data[i,:,:] - self.deri_vis_low) / self.deri_vis_range * 255).astype(np.uint8))
-            cv2.imwrite(f'{visualization_path}/boundary_depths/{i}.png', ((patches_bndry_dep_data[i,:,:] - self.deri_vis_low) / self.deri_vis_range * 255).astype(np.uint8))
+            cv2.imwrite(f'{visualization_path}/image_depths/{i}.png', ((patches_img_dep_data[i,:,:] - self.dep_vis_low) / self.dep_vis_range * 255).astype(np.uint8))
+            cv2.imwrite(f'{visualization_path}/boundary_depths/{i}.png', ((patches_bndry_dep_data[i,:,:] - self.dep_vis_low) / self.dep_vis_range * 255).clip(0,255).astype(np.uint8))
             cv2.imwrite(f'{visualization_path}/boundary_distances/{i}.png', (patches_bndry_dist_data[i,:,:] / np.max(patches_bndry_dist_data[i,:,:]) * 255).astype(np.uint8))
             if np.max(patches_deri_data[i,:,:,:]) > 0:
                 cv2.imwrite(f'{visualization_path}/derivative_maps/{i}.png', (patches_deri_data[i,:,:,:] / np.max(patches_deri_data[i,:,:,:]) * 255).astype(np.uint8))
