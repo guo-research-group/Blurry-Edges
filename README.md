@@ -8,7 +8,7 @@ Elmore Family School of Electrical and Computer Engineering, Purdue University
 
 Contact: xu1639@purdue.edu
 
-<a href="https://blurry-edges.qiguo.org/" title="Blurry-Edges project webpage">**Project webpage**</a> | <a href="https://drive.google.com/drive/folders/1kteggKmnYCLIYnCmNTyzCoKp3NM7WZ6V?usp=sharing" title="Blurry-Edges testing dataset">**Testing dataset**</a>
+<a href="https://blurry-edges.qiguo.org/" title="Blurry-Edges project webpage">**Project webpage**</a> | <a href="https://arxiv.org/abs/2503.23606" title="Blurry-Edges arXiv">**arXiv**</a> | <a href="https://drive.google.com/drive/folders/1kteggKmnYCLIYnCmNTyzCoKp3NM7WZ6V?usp=sharing" title="Blurry-Edges testing dataset">**Testing dataset**</a>
 
 **Content**
 
@@ -81,11 +81,13 @@ To generate the set with large image size, set `BIG = True`. We recommend using 
 ## 2 Citation
 
 ```
-@InProceedings{xu2025blurryedges,
-        author    = {Xu, Wei and Wagner, Charles James and Luo, Junjie and Guo, Qi},
-        title     = {Blurry-Edges: Photon-Limited Depth Estimation from Defocused Boundaries},
-        booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-        month     = {June},
-        year      = {2025}
-    }
+@misc{xu2025blurryedges,
+      title={Blurry-Edges: Photon-Limited Depth Estimation from Defocused Boundaries}, 
+      author={Wei Xu and Charles James Wagner and Junjie Luo and Qi Guo},
+      year={2025},
+      eprint={2503.23606},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2503.23606}, 
+}
 ```
