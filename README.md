@@ -1,6 +1,6 @@
 # Blurry-Edges: Photon-Limited Depth Estimation from Defocused Boundaries
 
-[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/) [![Accepted to CVPR 2025](https://img.shields.io/badge/Accepted-CVPR%202025-367DBD?style=flat&logo=ieee)](https://cvpr.thecvf.com/Conferences/2025)
+[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/) [![Accepted to CVPR 2025](https://img.shields.io/badge/Accepted-CVPR%202025-367DBD?style=flat&logo=ieee)](https://cvpr.thecvf.com/Conferences/2025) [![arXiv](https://img.shields.io/badge/arXiv-2503.23606-red)](https://arxiv.org/abs/2503.23606)
 
 *[Wei Xu](https://www.weixu.xyz/), [Charles James Wagner](https://www.linkedin.com/in/charlie-wagner-887284221/), [Junjie Luo](https://luo-jun-jie.github.io/), and [Qi Guo](https://qiguo.org)*
 
