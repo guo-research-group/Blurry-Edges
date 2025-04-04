@@ -1,6 +1,6 @@
 # Blurry-Edges: Photon-Limited Depth Estimation from Defocused Boundaries
 
-[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/) [![Accepted to CVPR 2025](https://img.shields.io/badge/Accepted-CVPR%202025-367DBD?style=flat&logo=ieee)](https://cvpr.thecvf.com/Conferences/2025) [![arXiv](https://img.shields.io/badge/arXiv-2503.23606-red)](https://arxiv.org/abs/2503.23606)
+[![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/) [![Accepted to CVPR 2025](https://img.shields.io/badge/Accepted-CVPR%202025-367DBD?style=flat&logo=ieee)](https://cvpr.thecvf.com/Conferences/2025) [![Project Webpage](https://img.shields.io/badge/Project%20Webpage-Blurry--Edges-green)](https://blurry-edges.qiguo.org/) [![arXiv](https://img.shields.io/badge/arXiv-2503.23606-red)](https://arxiv.org/abs/2503.23606) [![PyTorch](https://img.shields.io/badge/Implemented%20with-PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/) [![GitHub stars](https://img.shields.io/github/stars/guo-research-group/Blurry-Edges?style=social)](https://github.com/guo-research-group/Blurry-Edges/stargazers)
 
 *[Wei Xu](https://www.weixu.xyz/), [Charles James Wagner](https://www.linkedin.com/in/charlie-wagner-887284221/), [Junjie Luo](https://luo-jun-jie.github.io/), and [Qi Guo](https://qiguo.org)*
 
@@ -18,7 +18,7 @@ Contact: xu1639@purdue.edu
   * [1.2 Training](#12-training)
   * [1.3 Testing and evaluation](#13-testing-and-evaluation)
   * [1.4 Regenerate testing set](#14-regenerate-testing-set)
-- [2 Citation](#3-citation)
+- [2 Citation](#2-citation)
 
 ## 0 Introduction
 
