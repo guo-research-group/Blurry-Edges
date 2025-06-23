@@ -40,7 +40,7 @@ pip3 install torch torchvision torchaudio
 pip3 install -r requirements.txt
 ```
 
-We are seeking a reliable server to host our training and validation sets. *We will update this page once it's available. Stay tuned!* In the meantime, users can still generate these sets by following the steps outlined [below](#12-training). The testing sets are available for download via <a href="https://drive.google.com/drive/folders/1kteggKmnYCLIYnCmNTyzCoKp3NM7WZ6V?usp=sharing" title="fieldofjunctions">Google Drive</a>. The default paths of regular and big testing sets are `./data/data_test` and `./data/data_test_big`, respectively. 
+The training, validation, testing, and real captured data can be downloaded through <a href="https://purdue0-my.sharepoint.com/personal/xu1639_purdue_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fxu1639%5Fpurdue%5Fedu%2FDocuments%2FBlurry%2DEdges%20dataset&ga=1" title="Blurry-Edges dataset">OneDrive</a>. In the meantime, users can also generate own training, validation, and testing sets by following the steps outlined below. The default paths of regular and big testing sets are `./data/data_test` and `./data/data_test_big`, respectively. 
 
 ### 1.2 Training
 
