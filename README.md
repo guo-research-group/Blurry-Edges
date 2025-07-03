@@ -8,7 +8,7 @@ Elmore Family School of Electrical and Computer Engineering, Purdue University
 
 Contact: xu1639@purdue.edu
 
-<a href="https://blurry-edges.qiguo.org/" title="Blurry-Edges project webpage">**Project webpage**</a> | <a href="https://arxiv.org/abs/2503.23606" title="Blurry-Edges arXiv">**arXiv**</a> | <a href="https://drive.google.com/drive/folders/1kteggKmnYCLIYnCmNTyzCoKp3NM7WZ6V?usp=sharing" title="Blurry-Edges testing dataset">**Testing dataset**</a>
+<a href="https://blurry-edges.qiguo.org/" title="Blurry-Edges project webpage">**Project webpage**</a> | <a href="https://arxiv.org/abs/2503.23606" title="Blurry-Edges arXiv">**arXiv**</a> | <a href="https://purdue0-my.sharepoint.com/:f:/g/personal/xu1639_purdue_edu/EqD_pFLP0d9MvTJVwXrq-8kBwrkd4IioWmzNKOiWR2DEwg" title="Blurry-Edges dataset">**Dataset**</a>
 
 **Content**
 
@@ -40,7 +40,7 @@ pip3 install torch torchvision torchaudio
 pip3 install -r requirements.txt
 ```
 
-The training, validation, testing, and real captured data can be downloaded through <a href="https://purdue0-my.sharepoint.com/personal/xu1639_purdue_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fxu1639%5Fpurdue%5Fedu%2FDocuments%2FBlurry%2DEdges%20dataset&ga=1" title="Blurry-Edges dataset">OneDrive</a>. In the meantime, users can also generate own training, validation, and testing sets by following the steps outlined below. The default paths of regular and big testing sets are `./data/data_test` and `./data/data_test_big`, respectively. 
+The training, validation, testing, and real captured data can be downloaded through <a href="https://purdue0-my.sharepoint.com/:f:/g/personal/xu1639_purdue_edu/EqD_pFLP0d9MvTJVwXrq-8kBwrkd4IioWmzNKOiWR2DEwg" title="Blurry-Edges dataset">OneDrive</a>. In the meantime, users can also generate own training, validation, and testing sets by following the steps outlined below. The default paths of regular and big testing sets are `./data/data_test` and `./data/data_test_big`, respectively. 
 
 ### 1.2 Training
 
