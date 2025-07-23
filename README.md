@@ -18,7 +18,7 @@ Contact: xu1639@purdue.edu
   * [1.2 Training](#12-training)
   * [1.3 Testing and evaluation](#13-testing-and-evaluation)
   * [1.4 Regenerate testing set](#14-regenerate-testing-set)
-- [2 Citation](#2-citation)
+- [2 Reference](#2-reference)
 
 ## 0 Introduction
 
@@ -78,7 +78,7 @@ Users can generate the testing set (both regular and large size) by following st
 
 To generate the set with large image size, set `BIG = True`. We recommend using an image size of $147 + 4x$, where $x = 0, 1, 2, \cdots$. Users should also update `big_img_size` and `n_margin_patch` arguments accordingly. 
 
-## 2 Citation
+## 2 Reference
 
 ```
 @misc{xu2025blurryedges,
