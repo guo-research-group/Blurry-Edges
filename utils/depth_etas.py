@@ -24,13 +24,13 @@ class DepthEtas:
         condition1 = -torch.sin(self.theta_wng) * eta1 + torch.cos(self.theta_wng) * (eta2 - self.intercept)
         condition2 = -torch.sin(self.theta_mid) * (eta1 - self.intercept) + torch.cos(self.theta_mid) * eta2
         condition3 = -torch.sin(self.theta_wng) * (eta1 - self.intercept) + torch.cos(self.theta_wng) * eta2
-        sigma11 = torch.where(condition1 > 0, (eta1 + eta2 - self.intercept) / 2, \
+        eta11 = torch.where(condition1 > 0, (eta1 + eta2 - self.intercept) / 2, \
                               torch.where(condition2 > 0, self.intercept + (eta1 - eta2 - self.intercept) / 2, \
                                           torch.where(condition3 < 0, self.intercept + (eta1 + eta2 - self.intercept) / 2, eta1)))
-        sigma22 = torch.where(condition1 > 0, self.intercept + (eta1 + eta2 - self.intercept) / 2, \
+        eta22 = torch.where(condition1 > 0, self.intercept + (eta1 + eta2 - self.intercept) / 2, \
                               torch.where(condition2 > 0, (eta2 - eta1 + self.intercept) / 2, \
                                           torch.where(condition3 < 0, (eta1 + eta2 - self.intercept) / 2, eta2)))
-        z = self.numerator / (self.denominator_factor * (sigma11**2 - sigma22**2) + self.denominator_constant)
+        z = self.numerator / (self.denominator_factor * (eta11**2 - eta22**2) + self.denominator_constant)
         return z
     
     def depth2sigma(self, depth, rho_prime):
