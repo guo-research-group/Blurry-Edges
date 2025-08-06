@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from data import TestDataset
-from models import LocalStage, GlobalStage
+from models import LocalStage, GlobalStage, DepthCompletion
 from utils import get_args, DepthEtas, PostProcessGlobalBase, Visualizer, eval_depth
 
 class PostProcess(PostProcessGlobalBase):
@@ -14,6 +14,7 @@ class PostProcess(PostProcessGlobalBase):
         super().__init__(args, device)
         self.depthCal = depthCal
         self.rho_prime = args.rho_prime
+        self.densify = args.densify
     
     def get_colors(self, wedges, img_patches, colors_only):
         if colors_only:
@@ -40,14 +41,21 @@ class PostProcess(PostProcessGlobalBase):
             patches2 = (wedges2.unsqueeze(1) * colors.unsqueeze(-3).unsqueeze(-3)).sum(dim=2)
             patches = torch.cat([patches1.unsqueeze(1), patches2.unsqueeze(1)], dim=1)
 
-            depth_mask = (self.normalized_gaussian(dists[:,0,...]) > 0.5).to(torch.int32)
-            depth_mask_temp = (self.normalized_gaussian(dists[:,1,...]) > 0.5).to(torch.int32) * 2
-            depth_mask = torch.where((depth_mask_temp == 2) | (dists[:,1,...] >= 0), depth_mask_temp, depth_mask)
             depth_1 = self.depthCal.etas2depth(etas[:,0,:,:], etas[:,2,:,:])
             depth_2 = self.depthCal.etas2depth(etas[:,1,:,:], etas[:,3,:,:])
+        
+            if self.densify == 'w':
+                depth_mask = (dists[:,0,...] > 0).to(torch.int32)
+                depth_mask_temp = (dists[:,1,...] > 0).to(torch.int32) * 2
+                depth_mask = torch.where(depth_mask_temp == 2, depth_mask_temp, depth_mask)
+            else:
+                depth_mask = (self.normalized_gaussian(dists[:,0,...]) > 0.5).to(torch.int32)
+                depth_mask_temp = (self.normalized_gaussian(dists[:,1,...]) > 0.5).to(torch.int32) * 2
+                depth_mask = torch.where((depth_mask_temp == 2) | (dists[:,1,...] >= 0), depth_mask_temp, depth_mask)
+            
             depth_map = torch.where(depth_mask == 1, depth_1.unsqueeze(1).unsqueeze(1), \
                                     torch.where(depth_mask == 2, depth_2.unsqueeze(1).unsqueeze(1), depth_mask))
-        
+
             dists_B = torch.where(dists[:,1,...] >= 0, dists[:,1,...], \
                                   torch.where(torch.abs(dists[:,0,...])<torch.abs(dists[:,1,...]), torch.abs(dists[:,0,...]), torch.abs(dists[:,1,...])))
             local_boundaries = self.normalized_gaussian(dists_B)
@@ -91,12 +99,17 @@ class PostProcess(PostProcessGlobalBase):
             global_depth_map, confidence_map = self.local2global_depth(depth_map, depth_mask)
             return global_image.detach().cpu().numpy(), global_image_shpd.detach().cpu().numpy(), global_image_refoc.detach().cpu().numpy(), global_bndry.detach().cpu().numpy(), global_depth_map.detach().cpu().numpy(), confidence_map.detach().cpu().numpy()
 
-def depth_estimator(args, local_module, global_module, helper, visualizer, datasetloader):
+def depth_estimator(args, local_module, global_module, densify_pp_module, helper, visualizer, datasetloader):
     total_delta1, total_delta2, total_delta3, total_RMSE, total_AbsRel = 0, 0, 0, 0, 0
     total_running_time = 0
 
     if not os.path.exists(f'{args.log_path}/visualizations/'):
         os.makedirs(f'{args.log_path}/visualizations/')
+
+    if args.densify == 'w':
+        depth_thres = 0.0
+    else:
+        depth_thres = 0.05
 
     with torch.no_grad():
         for j, (img_ny, gt_depth) in enumerate(datasetloader):
@@ -125,8 +138,10 @@ def depth_estimator(args, local_module, global_module, helper, visualizer, datas
             est = torch.cat([xy, angles, etas_coef], dim=2)
 
             col_est, col_shpd, col_refoc, bndry_est, global_depth_map, confidence_map = helper(est, img_patches, colors_only=False)
-
-            depth_map = np.where(confidence_map > 0.05, global_depth_map, np.zeros_like(global_depth_map))
+            if args.densify == 'pp':
+                depth_map = densify_pp_module(torch.from_numpy(global_depth_map).to(helper.device).unsqueeze(1)).squeeze(1).detach().cpu().numpy()
+            else:
+                depth_map = np.where(confidence_map > depth_thres, global_depth_map, np.zeros_like(global_depth_map))
             running_time = time.time() - start_time
             total_running_time += running_time
 
@@ -169,10 +184,20 @@ if __name__ == "__main__":
     local_module.eval()
     
     global_module = GlobalStage(in_parameter_size=38, out_parameter_size=12, device=device).to(device)
-    global_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_global_stage.pth')) # change the path to your global stage weights
+    if args.densify == 'w':
+        global_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_global_stage_w.pth')) # change the path to your global stage weights
+    else:
+        global_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_global_stage.pth')) # change the path to your global stage weights
     global_module.eval()
+
+    if args.densify == 'pp':
+        densify_pp_module = DepthCompletion().to(device)
+        densify_pp_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_depth_completion_pp.pth')) # change the path to your global stage weights
+        densify_pp_module.eval()
+    else:
+        densify_pp_module = None
 
     depthCal = DepthEtas(args, device)
     helper = PostProcess(args, depthCal, device)
     visualizer = Visualizer(args.rho_prime)
-    depth_estimator(args, local_module, global_module, helper, visualizer, test_loader)
+    depth_estimator(args, local_module, global_module, densify_pp_module, helper, visualizer, test_loader)

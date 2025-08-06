@@ -6,9 +6,9 @@
 
 Elmore Family School of Electrical and Computer Engineering, Purdue University
 
-Contact: xu1639@purdue.edu
+Contact: weixu@purdue.edu
 
-<a href="https://blurry-edges.qiguo.org/" title="Blurry-Edges project webpage">**Project webpage**</a> | <a href="https://arxiv.org/abs/2503.23606" title="Blurry-Edges arXiv">**arXiv**</a> | <a href="https://blurry-edges.qiguo.org/data" title="Blurry-Edges dataset">**Dataset**</a>
+<a href="https://blurry-edges.qiguo.org/" title="Blurry-Edges project webpage">**Project webpage**</a> | <a href="https://arxiv.org/abs/2503.23606" title="Blurry-Edges arXiv">**arXiv**</a> | <a href="https://blurry-edges.qiguo.org/data" title="Blurry-Edges dataset">**Dataset**</a> | <a href="https://purdue0-my.sharepoint.com/:f:/g/personal/xu1639_purdue_edu/EqD_pFLP0d9MvTJVwXrq-8kBwrkd4IioWmzNKOiWR2DEwg" title="Blurry-Edges pretrained weights">**Pre-trained weights**</a>
 
 **Content**
 
@@ -42,6 +42,8 @@ pip3 install -r requirements.txt
 
 The training, validation, testing, and real captured data can be downloaded through <a href="https://blurry-edges.qiguo.org/data" title="Blurry-Edges dataset">this page</a>. In the meantime, users can also generate own training, validation, and testing sets by following the steps outlined below.
 
+The pre-trained weights can be downloaded through <a href="https://purdue0-my.sharepoint.com/:f:/g/personal/xu1639_purdue_edu/EqD_pFLP0d9MvTJVwXrq-8kBwrkd4IioWmzNKOiWR2DEwg" title="Blurry-Edges dataset">OneDrive</a>.
+
 ### 1.2 Training
 
 Prepare the training and validation set containing only basic shapes.
@@ -65,6 +67,14 @@ Train global stage.
 Test with synthetic data containing realistic textures.
 
     python blurry_edges_test.py
+
+Test with synthetic data containing realistic textures and output dense depth maps by assigning depth values to wedges.
+
+    python blurry_edges_test.py --densify 'w'
+
+Test with synthetic data containing realistic textures and output dense depth maps by U-Net post-prosseccing.
+
+    python blurry_edges_test.py --densify 'pp'
 
 Test with large-size synthetic data using blocks.
 

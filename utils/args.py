@@ -79,6 +79,7 @@ def get_args(mode, big=False):
         parser.add_argument('--batch_size', type=int, default=1, help='batch size')
         parser.add_argument('--crop', type=int, default=10, help='center crop')
         parser.add_argument('--rho_prime', type=float, default=10.39, help='equivalent optical power for refocusing')
+        parser.add_argument('--densify', type=str, default=None, help='densification method, set None to disable', choices=[None, 'pp', 'w'])
         if big:
             parser.add_argument('--n_margin_patch', type=int, default=10, help='number of margin patches that will be removed for global maps')
             parser.add_argument('--data_path', type=str, default='./data/data_test_big', help='path of dataset')
