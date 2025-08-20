@@ -19,6 +19,7 @@ Contact: weixu@purdue.edu
   * [1.3 Testing and evaluation](#13-testing-and-evaluation)
   * [1.4 Regenerate testing set](#14-regenerate-testing-set)
 - [2 Reference](#2-reference)
+- [3 Acknowledgement](#3-acknowledgement)
 
 ## 0 Introduction
 
@@ -99,3 +100,7 @@ To generate the set with large image size, set `BIG = True`. We recommend using 
         year={2025}
       }
 ```
+
+## 3 Acknowledgement
+
+We thank [Hyunseung (Seth) Eom](https://www.linkedin.com/in/eomh/), [Lucas Nguyen](https://www.linkedin.com/in/lucasnguyen1207/), and [Soumil Verma](https://www.linkedin.com/in/soumilverma/) for their contributions to the analysis and improvement of the code.
