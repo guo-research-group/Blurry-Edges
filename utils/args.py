@@ -21,7 +21,7 @@ def get_args(mode, big=False):
         parser.add_argument('--num_sample_val', type=int, default=2000, help='number of samples to generate in validation set')
         parser.add_argument('--num_shape', type=int, nargs=2, default=[15,26], help='number of shapes to generate in each image')
         parser.add_argument('--Z_range', type=float, nargs=2, default=[0.75,1.18], help='distance between the object and the camera (m)')
-        parser.add_argument('--alpha', type=int, nargs=2, default=[180,200], help='maximum average number of photons')
+        parser.add_argument('--alpha', type=float, nargs=2, default=[180.0,200.0], help='maximum average number of photons')
         parser.add_argument('--sigma', type=float, default=2, help='read noise coefficient')
 
     # local training
