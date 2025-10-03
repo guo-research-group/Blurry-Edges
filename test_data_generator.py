@@ -103,7 +103,8 @@ class SyntheticDataGenerator:
         return psf / np.sum(psf)
 
     def render_layer(self, depth_map, depth_key_pts, img_sharp, mask=None):
-        mask_blurred = np.zeros((self.n_img,*self.image_size), dtype=np.float64)
+        if isinstance(mask, np.ndarray):
+            mask_blurred = np.zeros((self.n_img,*self.image_size), dtype=np.float64)
         img_blurred = np.zeros((self.n_img,*self.image_size,3), dtype=np.float64)
         diff = depth_key_pts[1] - depth_key_pts[0]
         n_key_pts = len(depth_key_pts)
