@@ -8,7 +8,7 @@ Elmore Family School of Electrical and Computer Engineering, Purdue University
 
 Contact: weixu@purdue.edu
 
-<a href="https://blurry-edges.qiguo.org/" title="Blurry-Edges project webpage">**Project webpage**</a> | <a href="https://arxiv.org/abs/2503.23606" title="Blurry-Edges arXiv">**arXiv**</a> | <a href="https://blurry-edges.qiguo.org/data" title="Blurry-Edges dataset">**Dataset (includubg specifications)**</a> | <a href="https://purdue0-my.sharepoint.com/:f:/g/personal/xu1639_purdue_edu/EqD_pFLP0d9MvTJVwXrq-8kBwrkd4IioWmzNKOiWR2DEwg" title="Blurry-Edges pretrained weights">**Pre-trained weights**</a>
+<a href="https://blurry-edges.qiguo.org/" title="Blurry-Edges project webpage">**Project webpage**</a> | <a href="https://arxiv.org/abs/2503.23606" title="Blurry-Edges arXiv">**arXiv**</a> | <a href="https://blurry-edges.qiguo.org/data" title="Blurry-Edges dataset">**Dataset (including specifications)**</a> | <a href="https://purdue0-my.sharepoint.com/:f:/g/personal/xu1639_purdue_edu/EqD_pFLP0d9MvTJVwXrq-8kBwrkd4IioWmzNKOiWR2DEwg" title="Blurry-Edges pretrained weights">**Pre-trained weights**</a>
 
 **Content**
 
