@@ -2,28 +2,19 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 from scipy.ndimage import generate_binary_structure, binary_dilation, convolve
-from utils import get_args, set_seed, create_directory
+from utils import get_args, set_seed, create_directory, DataGenerator
 
-class SyntheticDataGenerator:
+class SyntheticShapeDataGenerator(DataGenerator):
     def __init__(self, args):
+        super().__init__(args)
         self.image_size = args.img_size
-        self.data_path = args.data_path
         self.num_sample_train = args.num_sample_train
         self.num_sample_val = args.num_sample_val
         self.num_shape = args.num_shape
-        self.Z_range = args.Z_range
-        self.s = args.cam_params['s']
-        self.rhos = np.array([args.cam_params['rho_1'],args.cam_params['rho_2']])
-        self.Sigma_cam = args.cam_params['sigma_cam']
-        self.pixel_pitch = args.cam_params['pixel_pitch']
-        self.mag = args.mag
-        self.alpha = args.alpha
-        self.sigma = args.sigma
         self.R = args.R
 
         self.dep_vis_low = 1.25 * self.Z_range[0] - 0.25 * self.Z_range[1] # lower - (upper - lower) * 0.25
         self.dep_vis_range = 1.25 * (self.Z_range[1] - self.Z_range[0]) # (upper - lower) + (upper - lower) * 0.25
-        self.n_img = len(self.rhos)
         self.struct_crop = generate_binary_structure(2, 2)
         self.half_R = self.R // 2
         self.margin_mask = np.zeros((self.image_size[0], self.image_size[1]), dtype=bool)
@@ -36,15 +27,6 @@ class SyntheticDataGenerator:
         self.sobel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=np.float64)
         self.sobel_y = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]], dtype=np.float64)
         self.deri_blank = np.zeros((self.n_img, self.image_size[0], self.image_size[1], 3), dtype=np.float64)
-
-    def get_blur_kernel(self, sigma, order=2):
-        k = np.ceil(np.abs(sigma) * 3).astype(np.int64)
-        x, y = np.meshgrid(np.linspace(-k, k, k * 2 + 1), np.linspace(-k, k, k * 2 + 1))
-        psf = np.exp(- np.power((x**2 + y**2) / (2 * sigma**2), order / 2))
-        return psf / np.sum(psf)
-
-    def get_kernel_sigma(self, z):
-        return np.abs((1 / z - self.rhos) * self.s + 1) * self.Sigma_cam / self.pixel_pitch / self.mag
 
     def generate_synthetic_image(self, num_obj):
     
@@ -298,7 +280,7 @@ if __name__ == "__main__":
 
     set_seed(1869)
 
-    generator = SyntheticDataGenerator(args)
+    generator = SyntheticShapeDataGenerator(args)
     
     print('Generating synthetic data for training set...')
     generator.generate_synthetic_data(train=True)

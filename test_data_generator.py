@@ -5,25 +5,16 @@ import cv2
 import os
 from tqdm import tqdm
 from pycocotools.coco import COCO
-from utils import get_args, set_seed, create_directory
+from utils import get_args, set_seed, create_directory, DataGenerator
 
-class SyntheticDataGenerator:
+class SyntheticRealisticDataGenerator(DataGenerator):
     def __init__(self, args, big=False):
+        super().__init__(args)
         self.image_size = np.array(args.big_img_size) if big else np.array(args.img_size)
-        self.save_path = args.data_path
         self.frgd_path = args.frgd_path
         self.bkgd_path = args.bkgd_path
         self.num_sample = args.num_sample_test
-        self.Z_range = args.Z_range
-        self.s = args.cam_params['s']
-        self.rhos = np.array([args.cam_params['rho_1'],args.cam_params['rho_2']])
-        self.Sigma_cam = args.cam_params['sigma_cam']
-        self.pixel_pitch = args.cam_params['pixel_pitch']
-        self.mag = args.mag
-        self.alpha = args.alpha
-        self.sigma = args.sigma
 
-        self.n_img = len(self.rhos)
         self.y, self.x = np.meshgrid(np.linspace(0, self.image_size[0]-1, self.image_size[0]), \
                            np.linspace(0, self.image_size[1]-1, self.image_size[1]), indexing='ij')
         self.org_pt = np.array([self.image_size[1]//2, self.image_size[0]//2])
@@ -93,15 +84,6 @@ class SyntheticDataGenerator:
     def get_depth_real(self, depth_norm):
         return (self.Z_range[1] - self.Z_range[0]) * depth_norm + self.Z_range[0]
 
-    def get_kernel_sigma(self, z):
-        return np.abs((1 / z - self.rhos) * self.s + 1) * self.Sigma_cam / self.pixel_pitch / self.mag
-
-    def get_blur_kernel(self, sigma, order=2):
-        k = np.ceil(np.abs(sigma) * 3).astype(np.int64)
-        x, y = np.meshgrid(np.linspace(-k, k, k * 2 + 1), np.linspace(-k, k, k * 2 + 1))
-        psf = np.exp(- np.power((x**2 + y**2) / (2 * sigma**2), order / 2))
-        return psf / np.sum(psf)
-
     def render_layer(self, depth_map, depth_key_pts, img_sharp, mask=None):
         if isinstance(mask, np.ndarray):
             mask_blurred = np.zeros((self.n_img,*self.image_size), dtype=np.float64)
@@ -155,7 +137,7 @@ class SyntheticDataGenerator:
         return img_clean, depth
     
     def generate_synthetic_data(self):
-        target_path = self.save_path
+        target_path = self.data_path
         create_directory(target_path)
         create_directory(f'{target_path}/clean')
         create_directory(f'{target_path}/noisy')
@@ -171,8 +153,8 @@ class SyntheticDataGenerator:
             img_ny = img_ny.clip(0, alpha_list[i]).round()
 
             for ii in range(self.n_img):
-                cv2.imwrite(f'{target_path}/clean/{i}_{ii}.png', img_gt[ii,:,:,:] / alpha_list[i] * 255)
-                cv2.imwrite(f'{target_path}/noisy/{i}_{ii}.png', img_ny[ii,:,:,:] / alpha_list[i] * 255)
+                cv2.imwrite(f'{target_path}/clean/{i}_{ii}.png', (img_gt[ii,:,:,:] / alpha_list[i] * 255).astype(np.uint8))
+                cv2.imwrite(f'{target_path}/noisy/{i}_{ii}.png', (img_ny[ii,:,:,:] / alpha_list[i] * 255).astype(np.uint8))
             cv2.imwrite(f'{target_path}/depth_maps/{i}.png', (((depth_map - self.Z_range[0]) / (self.Z_range[1] - self.Z_range[0])) * 255).astype(np.uint8))
 
             self.images_gt[i,:,:,:,:] = img_gt
@@ -190,7 +172,7 @@ if __name__ == "__main__":
 
     # set_seed(1869)
 
-    generator = SyntheticDataGenerator(args, big=BIG)
+    generator = SyntheticRealisticDataGenerator(args, big=BIG)
     generator.get_frgd()
     generator.get_bkgd()
     generator.generate_synthetic_data()
