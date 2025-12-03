@@ -23,7 +23,7 @@ Contact: weixu@purdue.edu
 
 ## 0 Introduction
 
-Blurry-Edges is a new image patch representation, Blurry-Edges, that explicitly stores and visualizes a rich set of low-level patch information, including boundaries, color, and smoothness. We develop a deep neural network architecture that predicts the Blurry-Edges representation from a pair of differently defocused images, from which depth can be analytically calculated using a novel DfD relation we derive.
+Blurry-Edges is a new image patch representation that explicitly stores and visualizes a rich set of low-level patch information, including boundaries, color, and smoothness. We develop a deep neural network architecture that predicts the Blurry-Edges representation from a pair of differently defocused images, from which depth can be analytically calculated using a novel DfD relation we derive.
 
 ![Overview](/pic/teaser.png "Overview")
 
