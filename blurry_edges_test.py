@@ -113,6 +113,9 @@ def depth_estimator(args, local_module, global_module, densify_pp_module, helper
 
     with torch.no_grad():
         for j, (img_ny, gt_depth) in enumerate(datasetloader):
+            # Only process images 180-189
+            if j < 180 or j >= 190:
+                continue
             print(f'Image pair #{j}:')
             start_time = time.time()
 

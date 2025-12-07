@@ -49,48 +49,19 @@ def compute_rmse(pred, gt, mask=None):
 
 def load_baseline_raw_depth(idx):
     """
-    Load RAW baseline depth from saved files
-    We'll use the approach of loading saved sparse depth and confidence,
-    then showing what happens if we use ALL predictions (no threshold)
+    Load ACTUAL RAW baseline depth (no threshold applied)
+    These are the real predictions from the baseline model before confidence thresholding
     """
-    # For this test, we'll generate raw depth by running baseline without threshold
-    # But since that requires the full baseline pipeline, we'll use a simpler approach:
-    # Load the sparse depth and show that using ALL of baseline's predictions
-    # (by setting threshold=0) gives poor results
+    # Load actual raw depth (saved from blurry_edges_test.py before thresholding)
+    raw_depth = np.load(f'./logs/blurry_edges_depths/raw_depth_{idx:03d}.npy')
     
-    # Actually, let's just use existing saved depths and show the comparison
-    # The key insight is: sparse_depth contains only high-confidence predictions
-    # If we could access low-confidence predictions, they would be noisy
-    
-    # For this demonstration, we'll simulate by showing:
-    # 1. What we have: thresholded (good)
-    # 2. What densifier does: fills intelligently
-    
-    # Load existing sparse depth (already thresholded)
+    # Load sparse depth (thresholded version)
     sparse_depth = np.load(f'./logs/blurry_edges_depths/depth_{idx:03d}.npy')
+    
+    # Load confidence map
     confidence = np.load(f'./logs/blurry_edges_depths/confidence_{idx:03d}.npy')
     
-    # To simulate "raw baseline", we'll use a naive fill of low-confidence regions
-    # This represents what baseline WOULD predict if we didn't threshold
-    # (in reality, it would be even worse - this is optimistic!)
-    from scipy.ndimage import distance_transform_edt, gaussian_filter
-    
-    # Naive filling: use nearest neighbor + noise (simulates poor low-conf predictions)
-    mask = sparse_depth > 0
-    if mask.sum() > 0:
-        # Distance transform to find nearest valid pixel
-        indices = distance_transform_edt(~mask, return_distances=False, return_indices=True)
-        naive_filled = sparse_depth[tuple(indices)]
-        
-        # Add noise to low-confidence regions (simulates baseline uncertainty)
-        noise_strength = (1 - confidence) * 0.3  # 30cm noise in low-conf regions
-        noise = np.random.randn(*naive_filled.shape) * noise_strength
-        naive_filled = naive_filled + noise
-        naive_filled = np.clip(naive_filled, 0.5, 2.5)
-    else:
-        naive_filled = sparse_depth
-    
-    return naive_filled, sparse_depth, confidence
+    return raw_depth, sparse_depth, confidence
 
 
 def test_raw_vs_densifier():
@@ -107,7 +78,7 @@ def test_raw_vs_densifier():
     # Load U-Net densifier
     print("Loading U-Net densifier...")
     densifier = DepthDensifierUNet(in_channels=6).to(device)
-    checkpoint = torch.load('./pretrained_weights/best_densifier.pth', map_location=device)
+    checkpoint = torch.load('./pretrained_weights/best_densifier.pth', map_location=device, weights_only=False)
     densifier.load_state_dict(checkpoint['model_state_dict'])
     densifier.eval()
     
@@ -118,9 +89,9 @@ def test_raw_vs_densifier():
     alphas_all = np.load(f'{data_path}/alphas.npy')
     depth_maps_all = np.load(f'{data_path}/depth_maps.npy')
     
-    # Test on 10 images
-    start_idx = 180
-    num_images = 10
+    # Test on first 4 images where we have raw depth data (000, 001, 002, 003)
+    start_idx = 0
+    num_images = 4
     
     # Results storage
     results = {
