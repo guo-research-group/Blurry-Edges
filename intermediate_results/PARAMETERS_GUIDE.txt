@@ -1,0 +1,24 @@
+================================================================================
+BLURRY-EDGES PARAMETERS GUIDE
+================================================================================
+
+WHAT ARE THESE PARAMETERS?
+--------------------------------------------------------------------------------
+Blurry-Edges uses coded aperture imaging to estimate depth from blur patterns.
+The LocalStage CNN extracts 10 parameters per image patch describing the blur.
+
+PARAMETER BREAKDOWN (LocalStage Output):
+--------------------------------------------------------------------------------
+File: raw_parameters/imgXXX_params_local.npy
+Shape: [2, H_patches, W_patches, 10]
+
+Dimensions:
+  [0] = View 1 (first image in stereo pair)
+  [1] = View 2 (second image in stereo pair)
+  [2,3] = Spatial location (row, column of patch in image grid)
+  [4] = 10 parameters per patch:
+
+Parameter indices [0:10]:
+  [0:4]  - XY Coordinates: (x1, y1, x2, y2)
+           Location of two wedge centers in the blur pattern
+
