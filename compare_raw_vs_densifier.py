@@ -24,8 +24,12 @@ from models.depth_densifier import DepthDensifierUNet
 from scipy.ndimage import sobel
 
 
-def compute_rmse(pred, gt, mask=None):
-    """Compute RMSE in centimeters"""
+def compute_rmse(pred, gt, mask=None, clip_range=(0.75, 1.18)):
+    """Compute RMSE in centimeters with optional clipping"""
+    # Clip predictions to valid depth range (same as eval_depth in metrics.py)
+    if clip_range is not None:
+        pred = np.clip(pred, clip_range[0], clip_range[1])
+    
     # Flatten arrays
     pred_flat = pred.flatten()
     gt_flat = gt.flatten()
@@ -89,9 +93,9 @@ def test_raw_vs_densifier():
     alphas_all = np.load(f'{data_path}/alphas.npy')
     depth_maps_all = np.load(f'{data_path}/depth_maps.npy')
     
-    # Test on first 4 images where we have raw depth data (000, 001, 002, 003)
-    start_idx = 0
-    num_images = 4
+    # Test on images 180-189 (test set that U-Net was validated on)
+    start_idx = 180
+    num_images = 10
     
     # Results storage
     results = {
@@ -101,7 +105,7 @@ def test_raw_vs_densifier():
     }
     
     # Create output directory
-    os.makedirs('./logs/raw_vs_densifier', exist_ok=True)
+    os.makedirs('./logs/test_set_comparison', exist_ok=True)
     
     print("\n" + "="*80)
     print(f"PROCESSING {num_images} TEST IMAGES (indices {start_idx}-{start_idx+num_images-1})")
@@ -175,11 +179,11 @@ def test_raw_vs_densifier():
         results['unet_densifier'].append(unet_rmse)
         
         # ===== SAVE RESULTS =====
-        np.save(f'./logs/raw_vs_densifier/img{idx}_raw_depth.npy', raw_depth)
-        np.save(f'./logs/raw_vs_densifier/img{idx}_threshold_depth.npy', thresholded_depth)
-        np.save(f'./logs/raw_vs_densifier/img{idx}_unet_depth.npy', unet_depth)
-        np.save(f'./logs/raw_vs_densifier/img{idx}_confidence.npy', confidence)
-        np.save(f'./logs/raw_vs_densifier/img{idx}_gt_depth.npy', gt_depth)
+        np.save(f'./logs/test_set_comparison/img{idx}_raw_depth.npy', raw_depth)
+        np.save(f'./logs/test_set_comparison/img{idx}_threshold_depth.npy', thresholded_depth)
+        np.save(f'./logs/test_set_comparison/img{idx}_unet_depth.npy', unet_depth)
+        np.save(f'./logs/test_set_comparison/img{idx}_confidence.npy', confidence)
+        np.save(f'./logs/test_set_comparison/img{idx}_gt_depth.npy', gt_depth)
         
         print(f"  Raw Baseline:    {raw_rmse:.2f} cm (100% coverage)")
         print(f"  Thresholded:     {thresh_rmse:.2f} cm ({thresh_coverage:.1f}% coverage)")
@@ -235,7 +239,7 @@ def test_raw_vs_densifier():
     visualize_results(start_idx, num_images)
     
     # Save numerical results
-    with open('./logs/raw_vs_densifier/results_summary.txt', 'w') as f:
+    with open('./logs/test_set_comparison/results_summary.txt', 'w') as f:
         f.write("="*80 + "\n")
         f.write("RAW BASELINE vs U-NET DENSIFIER COMPARISON\n")
         f.write("="*80 + "\n\n")
@@ -267,8 +271,8 @@ def test_raw_vs_densifier():
                    f"{results['threshold_baseline'][i]['rmse']:<15.2f} "
                    f"{results['unet_densifier'][i]:<12.2f}\n")
     
-    print(f"\n✅ Results saved to: ./logs/raw_vs_densifier/")
-    print(f"✅ Summary saved to: ./logs/raw_vs_densifier/results_summary.txt")
+    print(f"\n✅ Results saved to: ./logs/test_set_comparison/")
+    print(f"✅ Summary saved to: ./logs/test_set_comparison/results_summary.txt")
 
 
 def visualize_results(start_idx, num_images):
@@ -281,11 +285,11 @@ def visualize_results(start_idx, num_images):
     for idx in range(start_idx, start_idx + num_images):
         # Load results
         rgb_image = images_all[idx, 0]
-        gt_depth = np.load(f'./logs/raw_vs_densifier/img{idx}_gt_depth.npy')
-        raw_depth = np.load(f'./logs/raw_vs_densifier/img{idx}_raw_depth.npy')
-        threshold_depth = np.load(f'./logs/raw_vs_densifier/img{idx}_threshold_depth.npy')
-        unet_depth = np.load(f'./logs/raw_vs_densifier/img{idx}_unet_depth.npy')
-        confidence = np.load(f'./logs/raw_vs_densifier/img{idx}_confidence.npy')
+        gt_depth = np.load(f'./logs/test_set_comparison/img{idx}_gt_depth.npy')
+        raw_depth = np.load(f'./logs/test_set_comparison/img{idx}_raw_depth.npy')
+        threshold_depth = np.load(f'./logs/test_set_comparison/img{idx}_threshold_depth.npy')
+        unet_depth = np.load(f'./logs/test_set_comparison/img{idx}_unet_depth.npy')
+        confidence = np.load(f'./logs/test_set_comparison/img{idx}_confidence.npy')
         
         # Compute errors
         raw_rmse = compute_rmse(raw_depth, gt_depth)
@@ -346,7 +350,7 @@ def visualize_results(start_idx, num_images):
         plt.colorbar(im6, ax=axes[1, 3], fraction=0.046)
         
         plt.tight_layout()
-        plt.savefig(f'./logs/raw_vs_densifier/img{idx}_comparison.png', dpi=150, bbox_inches='tight')
+        plt.savefig(f'./logs/test_set_comparison/img{idx}_comparison.png', dpi=150, bbox_inches='tight')
         plt.close()
     
     print(f"✅ Generated {num_images} visualization images")
@@ -364,10 +368,10 @@ def create_summary_plot(start_idx, num_images):
     unet_rmse = []
     
     for idx in range(start_idx, start_idx + num_images):
-        gt_depth = np.load(f'./logs/raw_vs_densifier/img{idx}_gt_depth.npy')
-        raw_depth = np.load(f'./logs/raw_vs_densifier/img{idx}_raw_depth.npy')
-        threshold_depth = np.load(f'./logs/raw_vs_densifier/img{idx}_threshold_depth.npy')
-        unet_depth = np.load(f'./logs/raw_vs_densifier/img{idx}_unet_depth.npy')
+        gt_depth = np.load(f'./logs/test_set_comparison/img{idx}_gt_depth.npy')
+        raw_depth = np.load(f'./logs/test_set_comparison/img{idx}_raw_depth.npy')
+        threshold_depth = np.load(f'./logs/test_set_comparison/img{idx}_threshold_depth.npy')
+        unet_depth = np.load(f'./logs/test_set_comparison/img{idx}_unet_depth.npy')
         
         raw_rmse.append(compute_rmse(raw_depth, gt_depth))
         thresh_mask = threshold_depth > 0
@@ -407,7 +411,7 @@ def create_summary_plot(start_idx, num_images):
                     ha='center', va='bottom', fontsize=11, fontweight='bold')
     
     plt.tight_layout()
-    plt.savefig('./logs/raw_vs_densifier/summary_comparison.png', dpi=150, bbox_inches='tight')
+    plt.savefig('./logs/test_set_comparison/summary_comparison.png', dpi=150, bbox_inches='tight')
     plt.close()
     
     print("✅ Summary plot saved")
@@ -425,7 +429,7 @@ if __name__ == '__main__':
     print("\n" + "="*80)
     print("TEST COMPLETE!")
     print("="*80)
-    print("\nCheck outputs in: ./logs/raw_vs_densifier/")
+    print("\nCheck outputs in: ./logs/test_set_comparison/")
     print("  - Individual visualizations: img{XXX}_comparison.png")
     print("  - Summary plot: summary_comparison.png")
     print("  - Numerical results: results_summary.txt")
