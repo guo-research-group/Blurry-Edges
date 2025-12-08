@@ -1,11 +1,3 @@
-"""
-Testing Script for Depth Densifier
-====================================
-Evaluates the trained densifier on test set and compares:
-1. Blurry-Edges sparse depth (baseline)
-2. Densified depth (our contribution)
-"""
-
 import os
 import argparse
 import numpy as np
