@@ -1,0 +1,18 @@
+REGIONAL QUALITY ANALYSIS
+================================================================================
+
+High-confidence regions (24% coverage):
+  Sparse RMSE: 5.6733 ± 1.4490 cm
+  Dense RMSE:  5.5613 ± 1.2321 cm
+  Difference: -2.0%
+
+Low-confidence regions (76% coverage - sparse missing):
+  Dense RMSE: 6.1724 ± 1.5663 cm
+
+Overall (100% coverage):
+  Dense RMSE: 6.0787 ± 1.4108 cm
+
+Conclusion:
+  Neural densifier maintains quality on confident regions (-2.0% change)
+  while successfully filling 76% missing regions.
+  Trade-off: +-2.0% RMSE for +311% coverage.

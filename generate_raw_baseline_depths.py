@@ -1,13 +1,49 @@
+"""
+Generate RAW Blurry-Edges depth (no thresholding) for fair 100% coverage comparison.
+
+This script saves:
+1. global_depth_raw_{idx}.npy - Raw depth everywhere (100% coverage, includes noisy regions)
+2. confidence_{idx}.npy - Confidence map (for reference)
+
+This allows us to compare:
+- Threshold=0.0 on RAW depth (100% coverage, noisy)
+- Neural densifier (100% coverage, learned)
+"""
+
 import numpy as np
 import os
-import cv2
 import time
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from data import TestDataset
-from models import LocalStage, GlobalStage, DepthCompletion
-from utils import get_args, DepthEtas, PostProcessGlobalBase, Visualizer, eval_depth
+from models import LocalStage, GlobalStage
+from utils import get_args, DepthEtas, PostProcessGlobalBase
+
+
+class TestDataset(torch.utils.data.Dataset):
+    """Simple test dataset loader"""
+    def __init__(self, device, data_path='./data_test/regular'):
+        self.device = device
+        self.images = np.load(os.path.join(data_path, 'images_ny.npy'))
+        self.depths = np.load(os.path.join(data_path, 'depth_maps.npy'))
+        
+    def __len__(self):
+        return len(self.images)
+    
+    def __getitem__(self, idx):
+        image = self.images[idx]
+        depth = self.depths[idx]
+        
+        # Normalize if needed
+        alphas_path = os.path.join(os.path.dirname(os.path.join('./data_test/regular', 'images_ny.npy')), 'alphas.npy')
+        if os.path.exists(alphas_path):
+            alphas = np.load(alphas_path)
+            if len(alphas.shape) == 1:  # Scalar alphas
+                alpha = alphas[idx]
+                if alpha > 0:
+                    image = image / alpha
+        
+        return torch.from_numpy(image).float(), torch.from_numpy(depth).float()
 
 class PostProcess(PostProcessGlobalBase):
     def __init__(self, args, depthCal, device):
@@ -99,22 +135,27 @@ class PostProcess(PostProcessGlobalBase):
             global_depth_map, confidence_map = self.local2global_depth(depth_map, depth_mask)
             return global_image.detach().cpu().numpy(), global_image_shpd.detach().cpu().numpy(), global_image_refoc.detach().cpu().numpy(), global_bndry.detach().cpu().numpy(), global_depth_map.detach().cpu().numpy(), confidence_map.detach().cpu().numpy()
 
-def depth_estimator(args, local_module, global_module, densify_pp_module, helper, visualizer, datasetloader):
-    total_delta1, total_delta2, total_delta3, total_RMSE, total_AbsRel = 0, 0, 0, 0, 0
-    total_running_time = 0
-
-    if not os.path.exists(f'{args.log_path}/visualizations/'):
-        os.makedirs(f'{args.log_path}/visualizations/')
-
-    if args.densify == 'w':
-        depth_thres = 0.0
-    else:
-        depth_thres = 0.05
+def generate_raw_depths(args, local_module, global_module, helper, datasetloader, start_idx=180, num_images=20):
+    """Generate and save RAW unthresholded depth maps"""
+    
+    output_dir = './logs/blurry_edges_raw_depths'
+    os.makedirs(output_dir, exist_ok=True)
+    
+    print("="*80)
+    print("GENERATING RAW UNTHRESHOLDED DEPTH MAPS")
+    print("="*80)
+    print(f"Output directory: {output_dir}")
+    print(f"Processing images {start_idx} to {start_idx + num_images - 1}")
+    print()
 
     with torch.no_grad():
         for j, (img_ny, gt_depth) in enumerate(datasetloader):
-            print(f'Image pair #{j}:')
-            start_time = time.time()
+            if j < start_idx:
+                continue
+            if j >= start_idx + num_images:
+                break
+                
+            print(f'Processing image #{j}...', end=' ')
 
             t_img = img_ny.flatten(0,1).permute(0,3,1,2)
             img_patches = nn.Unfold(args.R, stride=args.stride)(t_img).view(2, 3, args.R, args.R, helper.H_patches, helper.W_patches)
@@ -138,50 +179,53 @@ def depth_estimator(args, local_module, global_module, densify_pp_module, helper
             est = torch.cat([xy, angles, etas_coef], dim=2)
 
             col_est, col_shpd, col_refoc, bndry_est, global_depth_map, confidence_map = helper(est, img_patches, colors_only=False)
-            if args.densify == 'pp':
-                depth_map = densify_pp_module(torch.from_numpy(global_depth_map).to(helper.device).unsqueeze(1)).squeeze(1).detach().cpu().numpy()
-            else:
-                depth_map = np.where(confidence_map > depth_thres, global_depth_map, np.zeros_like(global_depth_map))
             
-            # Save depth maps for fusion
-            depth_save_dir = './logs/blurry_edges_depths'
-            os.makedirs(depth_save_dir, exist_ok=True)
-            np.save(f'{depth_save_dir}/depth_{j:03d}.npy', depth_map)
-            np.save(f'{depth_save_dir}/confidence_{j:03d}.npy', confidence_map)
-            # ALSO save raw depth (before thresholding) for comparison
-            np.save(f'{depth_save_dir}/raw_depth_{j:03d}.npy', global_depth_map)
+            # CRITICAL: Save RAW global_depth_map (no thresholding!)
+            # This has depth everywhere (100% coverage), but includes noisy low-confidence regions
+            np.save(f'{output_dir}/global_depth_raw_{j:03d}.npy', global_depth_map)
+            np.save(f'{output_dir}/confidence_{j:03d}.npy', confidence_map)
             
-            running_time = time.time() - start_time
-            total_running_time += running_time
+            # Print statistics
+            valid_pixels = (confidence_map > 0).sum()
+            total_pixels = confidence_map.size
+            coverage = valid_pixels / total_pixels * 100
+            
+            print(f'✓ Saved (coverage: {coverage:.1f}%)')
 
-            error_mask = depth_map>0.0
-            delta1, delta2, delta3, RMSE, AbsRel = eval_depth(depth_map, gt_depth.detach().cpu().numpy(), error_mask, crop=args.crop)
-            total_delta1 += delta1
-            total_delta2 += delta2
-            total_delta3 += delta3
-            total_RMSE += RMSE
-            total_AbsRel += AbsRel
-            print(f'--- Error metrics: delta1 ={delta1: .3f}, delta2 ={delta2: .3f}, delta3 ={delta3: .3f}, RMSE ={RMSE: .3f} cm, AbsRel ={AbsRel: .3f} cm')
-
-            result_plot = visualizer.visualize(img_ny.detach().cpu().numpy()[0,0,:,:,:],
-                                               img_ny.detach().cpu().numpy()[0,1,:,:,:],
-                                               col_est[0,0,:,:,:].transpose(1, 2, 0),
-                                               col_est[0,1,:,:,:].transpose(1, 2, 0),
-                                               col_shpd[0,:,:,:].transpose(1, 2, 0),
-                                               col_refoc[0,:,:,:].transpose(1, 2, 0),
-                                               confidence_map[0,:,:],
-                                               bndry_est[0,0,:,:],
-                                               gt_depth[0,:,:].detach().cpu().numpy(),
-                                               depth_map[0,:,:])
-            cv2.imwrite(f'{args.log_path}/visualizations/{j}.png', result_plot)
-            print(f'--- Running time:{running_time: .3f} s')
-
-        n_sample = len(datasetloader)
-        print(f'\nAverage running time:{total_running_time/n_sample: .3f} s')
-        print(f'Average metrics for whole dataset: delta1 ={total_delta1/n_sample: .3f}, delta2 ={total_delta2/n_sample: .3f}, delta3 ={total_delta3/n_sample: .3f}, RMSE ={total_RMSE/n_sample: .3f} cm, AbsRel ={total_AbsRel/n_sample: .3f} cm')
+    print()
+    print("="*80)
+    print(f"✓ Completed! Saved {num_images} raw depth maps to: {output_dir}")
+    print()
+    print("These files contain:")
+    print("  - global_depth_raw_*.npy: RAW depth everywhere (no threshold)")
+    print("  - confidence_*.npy: Confidence maps (same as before)")
+    print()
+    print("Now you can compare:")
+    print("  1. Threshold=0.0 on raw depth (100% coverage, includes noise)")
+    print("  2. Neural densifier (100% coverage, learned denoising)")
+    print("="*80)
 
 if __name__ == "__main__":
+    import sys
+    
+    # Extract our custom arguments first
+    start_idx = 180
+    num_images = 20
+    
+    if '--start_idx' in sys.argv:
+        idx = sys.argv.index('--start_idx')
+        start_idx = int(sys.argv[idx + 1])
+        sys.argv.pop(idx)  # Remove --start_idx
+        sys.argv.pop(idx)  # Remove value
+    
+    if '--num_images' in sys.argv:
+        idx = sys.argv.index('--num_images')
+        num_images = int(sys.argv[idx + 1])
+        sys.argv.pop(idx)  # Remove --num_images
+        sys.argv.pop(idx)  # Remove value
+    
     args = get_args('eval')
+    extra_args = type('Args', (), {'start_idx': start_idx, 'num_images': num_images})()
 
     device = torch.device(args.cuda)
 
@@ -189,24 +233,18 @@ if __name__ == "__main__":
     test_loader = DataLoader(dataset_test, batch_size=args.batch_size, shuffle=False)
 
     local_module = LocalStage().to(device)
-    local_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_local_stage.pth', map_location=device)) # change the path to your local stage weights
+    local_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_local_stage.pth', map_location=device))
     local_module.eval()
     
     global_module = GlobalStage(in_parameter_size=38, out_parameter_size=12, device=device).to(device)
     if args.densify == 'w':
-        global_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_global_stage_w.pth', map_location=device)) # change the path to your global stage weights
+        global_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_global_stage_w.pth', map_location=device))
     else:
-        global_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_global_stage.pth', map_location=device)) # change the path to your global stage weights
+        global_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_global_stage.pth', map_location=device))
     global_module.eval()
-
-    if args.densify == 'pp':
-        densify_pp_module = DepthCompletion().to(device)
-        densify_pp_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_depth_completion_pp.pth', map_location=device)) # change the path to your global stage weights
-        densify_pp_module.eval()
-    else:
-        densify_pp_module = None
 
     depthCal = DepthEtas(args, device)
     helper = PostProcess(args, depthCal, device)
-    visualizer = Visualizer(args.rho_prime)
-    depth_estimator(args, local_module, global_module, densify_pp_module, helper, visualizer, test_loader)
+    
+    generate_raw_depths(args, local_module, global_module, helper, test_loader, 
+                       start_idx=extra_args.start_idx, num_images=extra_args.num_images)
