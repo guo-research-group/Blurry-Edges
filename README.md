@@ -2,7 +2,7 @@
 
 [![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/) [![Accepted to CVPR 2025](https://img.shields.io/badge/Accepted-CVPR%202025-367DBD?style=flat&logo=ieee)](https://cvpr.thecvf.com/Conferences/2025) [![Project Webpage](https://img.shields.io/badge/Project%20Webpage-Blurry--Edges-green)](https://blurry-edges.qiguo.org/) [![arXiv](https://img.shields.io/badge/arXiv-2503.23606-red)](https://arxiv.org/abs/2503.23606) [![PyTorch](https://img.shields.io/badge/Implemented%20with-PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/) [![GitHub stars](https://img.shields.io/github/stars/guo-research-group/Blurry-Edges?style=social)](https://github.com/guo-research-group/Blurry-Edges/stargazers)
 
-*[Wei Xu](https://www.weixu.xyz/), [Charles James Wagner](https://www.linkedin.com/in/charlie-wagner-887284221/), [Junjie Luo](https://luo-jun-jie.github.io/), and [Qi Guo](https://qiguo.org)*
+*[Wei Xu](https://www.weixu.net/), [Charles James Wagner](https://www.linkedin.com/in/charlie-wagner-887284221/), [Junjie Luo](https://luo-jun-jie.github.io/), and [Qi Guo](https://qiguo.org)*
 
 Elmore Family School of Electrical and Computer Engineering, Purdue University
 
