@@ -113,7 +113,6 @@ class SyntheticRealisticDataGenerator(DataGenerator):
             return img_blurred
 
     def render_image(self, depth_bkgd, depth_frgd, frgd_mask, bkgd_obj, frgd_obj, n_interval=150):
-        img_clean = np.zeros((self.n_img, *self.image_size, 3), dtype=np.float64)
         depth_bkgd_key_pts = np.linspace(depth_bkgd.max(), depth_bkgd.min(), n_interval+1)
         depth_frgd_key_pts = np.linspace(depth_frgd[frgd_mask].max(), depth_frgd[frgd_mask].min(), n_interval+1)
         img_bkgd_blurred = self.render_layer(depth_bkgd, depth_bkgd_key_pts, bkgd_obj)
@@ -122,7 +121,6 @@ class SyntheticRealisticDataGenerator(DataGenerator):
         return img_clean
 
     def generate_synthetic_image(self, i):
-        img_clean = np.zeros((self.n_img, self.image_size[0], self.image_size[1], 3), dtype=np.float64)
         relative_depth_key_pts = np.flip(np.sort(np.random.rand(4))) # (1 ->) [bg1, bg2, fg1, fg2] (-> 0)
         angles = np.random.rand(2) * 2 * np.pi
         modi_depth = (-np.sin(angles[:,None,None]) * (self.x[None,:,:] - self.org_pt[0]) + \
