@@ -1,0 +1,16 @@
+FAIR 100% COVERAGE COMPARISON
+================================================================================
+
+Both methods evaluated at 100% coverage:
+
+Naive Interpolation (nearest-neighbor):
+  RMSE: 7.8945 cm
+  AbsRel: 5.3603 cm
+  Delta1: 0.5101
+
+Neural Densifier:
+  RMSE: 6.0787 cm
+  AbsRel: 4.7740 cm
+  Delta1: 0.4291
+
+Winner: Neural Densifier (23.0% better)
