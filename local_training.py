@@ -87,7 +87,6 @@ if __name__ == "__main__":
     criteria = LocalLoss(args, device)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.9, patience=2, min_lr=args.learning_rate*0.1)
 
-    lr_updated = 0
     best_avg_loss = np.inf
     best_epoch = 0
     avg_total_loss = np.zeros((args.epoch_num,), dtype=float)

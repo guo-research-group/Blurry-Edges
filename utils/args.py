@@ -28,7 +28,7 @@ def get_args(mode, big=False):
     elif mode == 'local_train':
         parser.add_argument('--data_path', type=str, default='./data/data_train_val/patches', help='path of dataset')
         parser.add_argument('--log_path', type=str, default='./logs', help='path of logs')
-        parser.add_argument('--epoch_num', type=int, default=1000, help='number of epoches')
+        parser.add_argument('--epoch_num', type=int, default=1000, help='number of epochs')
         parser.add_argument('--learning_rate', type=float, default=6e-5, help='initial learning rate for late training')
         parser.add_argument('--batch_size', type=int, default=64, help='batch size') # 64
         parser.add_argument('--beta_bndry_loc', type=float, default=0.001, help='weight for boundary localization error')
@@ -46,7 +46,7 @@ def get_args(mode, big=False):
         parser.add_argument('--stride', type=int, default=2, help='stride')
         parser.add_argument('--data_path', type=str, default='./data/data_train_val', help='path of dataset')
         parser.add_argument('--log_path', type=str, default='./logs', help='path of logs')
-        parser.add_argument('--epoch_num', type=int, default=350, help='number of epoches')
+        parser.add_argument('--epoch_num', type=int, default=350, help='number of epochs')
         parser.add_argument('--learning_rate', type=float, default=1e-4, help='initial learning rate for late training')
         parser.add_argument('--batch_size', type=int, default=8, help='number of batch size')
 

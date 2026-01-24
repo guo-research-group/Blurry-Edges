@@ -29,10 +29,10 @@ def create_directory(path, overwrite=True):
 
 def showCurve(args, points, figname):
     plt.figure(figsize = (8,6))
-    plt.xlabel('Epoches')
+    plt.xlabel('Epochs')
     plt.ylabel('Average loss')
-    epoches_num = np.arange(points.shape[0])
+    epochs_num = np.arange(points.shape[0])
     plt.yscale("log")
-    plt.plot(epoches_num, points, linestyle='-', color='b', linewidth=2)
+    plt.plot(epochs_num, points, linestyle='-', color='b', linewidth=2)
     cf = plt.gcf()
     cf.savefig(f'{args.log_path}/{figname}.png', format='png', bbox_inches='tight', dpi=600)
