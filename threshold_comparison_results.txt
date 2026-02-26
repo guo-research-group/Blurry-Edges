@@ -1,0 +1,42 @@
+====================================================================================================
+THRESHOLD vs NEURAL DENSIFIER COMPARISON - VALIDATION RESULTS
+====================================================================================================
+
+Test set: Images 180 to 199
+
+threshold_0.5:
+  Coverage: 1.74%
+  RMSE: 6.5171 cm
+  MAE: 4.0677 cm
+  Delta1: 0.5335
+
+threshold_0.3:
+  Coverage: 4.79%
+  RMSE: 6.1129 cm
+  MAE: 3.7278 cm
+  Delta1: 0.5566
+
+threshold_0.1:
+  Coverage: 15.68%
+  RMSE: 5.6868 cm
+  MAE: 3.4797 cm
+  Delta1: 0.5707
+
+threshold_0.05:
+  Coverage: 24.33%
+  RMSE: 5.6733 cm
+  MAE: 3.5102 cm
+  Delta1: 0.5675
+
+threshold_0.0:
+  Coverage: 24.33%
+  RMSE: 5.6733 cm
+  MAE: 3.5102 cm
+  Delta1: 0.5675
+
+neural:
+  Coverage: 100.00%
+  RMSE: 6.0786 cm
+  MAE: 4.5961 cm
+  Delta1: 0.4291
+

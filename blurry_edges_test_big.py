@@ -224,6 +224,7 @@ if __name__ == "__main__":
 
     device = torch.device(args.cuda)
 
+    # Note: TestDataset now automatically normalizes images by alpha
     dataset_test = TestDataset(device, data_path=args.data_path)
     test_loader = DataLoader(dataset_test, batch_size=args.batch_size, shuffle=False)
 

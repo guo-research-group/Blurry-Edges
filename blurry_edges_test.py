@@ -142,6 +142,15 @@ def depth_estimator(args, local_module, global_module, densify_pp_module, helper
                 depth_map = densify_pp_module(torch.from_numpy(global_depth_map).to(helper.device).unsqueeze(1)).squeeze(1).detach().cpu().numpy()
             else:
                 depth_map = np.where(confidence_map > depth_thres, global_depth_map, np.zeros_like(global_depth_map))
+            
+            # Save depth maps for fusion
+            depth_save_dir = './logs/blurry_edges_depths'
+            os.makedirs(depth_save_dir, exist_ok=True)
+            np.save(f'{depth_save_dir}/depth_{j:03d}.npy', depth_map)
+            np.save(f'{depth_save_dir}/confidence_{j:03d}.npy', confidence_map)
+            # ALSO save raw depth (before thresholding) for comparison
+            np.save(f'{depth_save_dir}/raw_depth_{j:03d}.npy', global_depth_map)
+            
             running_time = time.time() - start_time
             total_running_time += running_time
 
@@ -180,19 +189,19 @@ if __name__ == "__main__":
     test_loader = DataLoader(dataset_test, batch_size=args.batch_size, shuffle=False)
 
     local_module = LocalStage().to(device)
-    local_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_local_stage.pth')) # change the path to your local stage weights
+    local_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_local_stage.pth', map_location=device)) # change the path to your local stage weights
     local_module.eval()
     
     global_module = GlobalStage(in_parameter_size=38, out_parameter_size=12, device=device).to(device)
     if args.densify == 'w':
-        global_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_global_stage_w.pth')) # change the path to your global stage weights
+        global_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_global_stage_w.pth', map_location=device)) # change the path to your global stage weights
     else:
-        global_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_global_stage.pth')) # change the path to your global stage weights
+        global_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_global_stage.pth', map_location=device)) # change the path to your global stage weights
     global_module.eval()
 
     if args.densify == 'pp':
         densify_pp_module = DepthCompletion().to(device)
-        densify_pp_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_depth_completion_pp.pth')) # change the path to your global stage weights
+        densify_pp_module.load_state_dict(torch.load(f'{args.model_path}/pretrained_depth_completion_pp.pth', map_location=device)) # change the path to your global stage weights
         densify_pp_module.eval()
     else:
         densify_pp_module = None

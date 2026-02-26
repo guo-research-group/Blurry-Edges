@@ -1,1 +1,0 @@
-The pre-trained weights can be downloaded through <a href="https://purdue0-my.sharepoint.com/:f:/g/personal/xu1639_purdue_edu/EqD_pFLP0d9MvTJVwXrq-8kBwrkd4IioWmzNKOiWR2DEwg" title="Blurry-Edges dataset">OneDrive</a>.
